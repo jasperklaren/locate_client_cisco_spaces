@@ -24,11 +24,15 @@ def get_client_floor_id(mac):
     response = requests.request("GET", url, headers=headers)
 
     if response.status_code == 401:
-        raise Exception(f"Failed to get response from Cisco Spaces (code: {response.status_code}) API token invalid")
+        raise Exception(
+            f"Failed to get response from Cisco Spaces (code: {response.status_code}) API token invalid"
+        )
 
     response = response.json()
     if not response["results"]:
-        raise Exception(f"No client found. Is it a wireless client? or check MAC ({MAC})")
+        raise Exception(
+            f"No client found. Is it a wireless client? or check MAC ({MAC})"
+        )
     else:
         floorId = response["results"][0]["floorId"]
         client_x = round(response["results"][0]["coordinates"][0])
@@ -39,7 +43,16 @@ def get_client_floor_id(mac):
         client_associated_ap = response["results"][0]["associatedApName"]
         client_associated = response["results"][0]["associated"]
 
-        return floorId, client_x, client_y, client_last_seen, client_username, client_ip, client_associated_ap, client_associated
+        return (
+            floorId,
+            client_x,
+            client_y,
+            client_last_seen,
+            client_username,
+            client_ip,
+            client_associated_ap,
+            client_associated,
+        )
 
 
 def get_floor_image_filename(floorId):
@@ -77,8 +90,11 @@ def draw_client_location(image, mac, x, y, width, length, detail_width):
     x = round(x * conversion)
     y = round(y * conversion)
     img = cv.circle(img, (x, y), DOT_SIZE, red, -1)
-    cv.imwrite(f"location_client_{mac}.jpg", img)
+    save_as = f"location_client_{mac}.jpg"
+    cv.imwrite(save_as, img)
     os.remove(image)
+    
+    return save_as
 
 
 def main():
@@ -92,23 +108,23 @@ def main():
             username,
             ip,
             associated_ap,
-            associated
+            associated,
         ) = get_client_floor_id(MAC)
-        
+
         # Get the floor image filename and some extra metadata about the floor
         (
             floor_image_filename,
             floor_image_width,
             floor_image_length,
             floor_image_detail_width,
-            floor_name
+            floor_name,
         ) = get_floor_image_filename(client_floor_id)
-        
+
         # Get the actual image and save to disk
         get_floor_image(floor_image_filename)
-        
+
         # Draw location of client on the downloaded image
-        draw_client_location(
+        file_name = draw_client_location(
             floor_image_filename,
             MAC,
             x,
@@ -119,8 +135,9 @@ def main():
         )
 
         # Print result information
-        print(f''' 
-        Image filename: {floor_image_filename}
+        print(
+            f""" 
+        Image filename: {file_name}
         MAC: {MAC}
         Username: {username}
         IP: {ip}
@@ -128,7 +145,8 @@ def main():
         Is Associated: {associated}
         Associated Accesspoint: {associated_ap}
         Last Seen: {last_seen}
-        ''')
+        """
+        )
     except Exception as e:
         print(e)
 
