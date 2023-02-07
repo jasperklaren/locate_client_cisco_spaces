@@ -9,6 +9,7 @@ API_TOKEN = os.getenv("API_TOKEN")
 CLIENT_URL = os.getenv("CLIENT_URL")
 FLOOR_URL = os.getenv("FLOOR_URL")
 IMAGE_URL = os.getenv("IMAGE_URL")
+DOT_SIZE = int(os.getenv("DOT_SIZE"))
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -62,26 +63,29 @@ def draw_client_location(image, mac, x, y, width, length, detail_width):
     conversion = detail_width/width
     x = round(x * conversion)
     y = round(y * conversion)
-    img = cv.circle(img, (x, y), 10, red, -1)
+    img = cv.circle(img, (x, y), DOT_SIZE, red, -1)
     cv.imwrite(f"location_client_{mac}.jpg", img)
     os.remove(image)
 
+def main():
+    try:
+        # Get the current floor where the client is active
+        client_floor_id, x, y = get_client_floor_id(MAC)
+        # Get the floor image filename
+        (
+            floor_image_filename,
+            floor_image_width,
+            floor_image_length,
+            floor_image_detail_width,
+        ) = get_floor_image_filename(client_floor_id)
+        # Get the actual image
+        floor_image = get_floor_image(floor_image_filename)
+        # Draw location of client op image
+        draw_client_location(
+            floor_image_filename, MAC, x, y, floor_image_width, floor_image_length, floor_image_detail_width
+        )
+    except Exception as e:
+        print(e)
 
-try:
-    # Get the current floor where the client is active
-    client_floor_id, x, y = get_client_floor_id(MAC)
-    # Get the floor image filename
-    (
-        floor_image_filename,
-        floor_image_width,
-        floor_image_length,
-        floor_image_detail_width,
-    ) = get_floor_image_filename(client_floor_id)
-    # Get the actual image
-    floor_image = get_floor_image(floor_image_filename)
-    # Draw location of client op image
-    draw_client_location(
-        floor_image_filename, MAC, x, y, floor_image_width, floor_image_length, floor_image_detail_width
-    )
-except Exception as e:
-    print(e)
+if __name__ == "__main__":
+    main()
