@@ -11,7 +11,7 @@ to retrieve the floor image and draws a circle at the client location. This imag
 
 ### Installing
 
-* Rename .env_EXMPLE to .env and fill out the .env file
+* Rename .env_EXAMPLE to .env and fill out the .env file
 * Create a virtual environment and activate it
 * Run pip install -r requirements.txt
 
